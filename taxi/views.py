@@ -3,6 +3,7 @@ from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views import generic
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth import get_user_model
 
 from taxi.forms import (
     DriverCreationForm,
@@ -85,37 +86,41 @@ class CarDeleteView(LoginRequiredMixin, generic.DeleteView):
 
 
 class DriverListView(LoginRequiredMixin, generic.ListView):
-    model = Driver
+    model = get_user_model()
     paginate_by = 5
 
 
 class DriverDetailView(LoginRequiredMixin, generic.DetailView):
-    model = Driver
+    model = get_user_model()
     queryset = Driver.objects.all().prefetch_related("cars__manufacturer")
 
 
-class DriverCreateilView(generic.CreateView):
-    model = Driver
+class DriverCreateView(generic.CreateView):
+    model = get_user_model()
     form_class = DriverCreationForm
 
 
-class DriverUpdateLicenseNumberView(generic.CreateView):
-    model = Driver
+class DriverUpdateLicenseNumberView(generic.UpdateView):
+    model = get_user_model()
     form_class = DriverLicenseUpdateForm
-
-
-class DriverDeleteView(LoginRequiredMixin, generic.DeleteView):
-    model = Driver
     success_url = reverse_lazy("taxi:driver-list")
 
 
+class DriverDeleteView(LoginRequiredMixin, generic.DeleteView):
+    model = get_user_model()
+    success_url = reverse_lazy("taxi:driver-list")
+
+
+@login_required
 def car_driver_update_view(request, pk):
-    car = Car.objects.get(pk=pk)
-    if request.user not in car.drivers.all():
-        car.drivers.add(request.user)
-        car.save()
-        return redirect("taxi:car-detail", pk)
-    else:
-        car.drivers.remove(request.user)
-        car.save()
-        return redirect("taxi:car-detail", pk)
+    if request.method == "POST":
+        car = Car.objects.get(pk=pk)
+        if request.user not in car.drivers.all():
+            car.drivers.add(request.user)
+            car.save()
+            return redirect("taxi:car-detail", pk)
+        else:
+            car.drivers.remove(request.user)
+            car.save()
+            return redirect("taxi:car-detail", pk)
+    return redirect("taxi:car-detail", pk)

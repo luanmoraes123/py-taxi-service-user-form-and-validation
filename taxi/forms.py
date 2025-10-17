@@ -7,7 +7,7 @@ from django.contrib.auth import get_user_model
 
 class DriverCreationForm(UserCreationForm):
     class Meta(UserCreationForm.Meta):  # type: ignore
-        model = Driver
+        model = get_user_model()
         fields = UserCreationForm.Meta.fields + (  # type: ignore
             "license_number",
             "first_name",
@@ -34,7 +34,7 @@ class DriverCreationForm(UserCreationForm):
 
 class DriverLicenseUpdateForm(forms.ModelForm):
     class Meta:
-        model = Driver
+        model = get_user_model()
         fields = ["license_number"]
 
     def clean_license_number(self):
