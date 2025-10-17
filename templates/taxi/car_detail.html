@@ -16,7 +16,7 @@
     <form action="{% url "taxi:car-update-driver" car.id %}" method="POST">
       {% csrf_token %}
       {% if user not in car.drivers.all %}
-        <button class="btn btn-primary link-to-page" >Assaign me to this car</button>
+        <button class="btn btn-primary link-to-page" >Assign me to this car</button>
       {% else %}
         <button class="btn btn-danger link-to-page" >Delete me from this car</button>
       {% endif %}
